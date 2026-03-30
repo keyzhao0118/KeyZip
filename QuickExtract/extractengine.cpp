@@ -2,7 +2,6 @@
 #include "archivehelper.h"
 #include "opencallback.h"
 #include "extractcallback.h"
-#include "filewriterthread.h"
 #include <QFileInfo>
 #include <QDir>
 #include <QElapsedTimer>
@@ -73,9 +72,6 @@ void ExtractEngine::run()
 			continue;
 		}
 
-		FileWriterThread writerThread;
-		writerThread.start();
-
 		OpenCallback* openCbSpec = new OpenCallback();
 		CMyComPtr<IArchiveOpenCallback> openCb(openCbSpec);
 		openCbSpec->setCancelFlag(&m_cancelFlag);
@@ -88,7 +84,6 @@ void ExtractEngine::run()
 
 		if (hrOpen != S_OK)
 		{
-			writerThread.stop();
 			if (hrOpen == E_ABORT)
 			{
 				emit archiveFinished(archiveName, false, tr("Cancelled"), timer.elapsed());
@@ -102,7 +97,7 @@ void ExtractEngine::run()
 		CMyComPtr<IArchiveExtractCallback> extractCb(extractCbSpec);
 
 		QString password = openCbSpec->getPassword();
-		extractCbSpec->init(archive, destDir, password, &writerThread);
+		extractCbSpec->init(archive, destDir, password);
 		extractCbSpec->setCancelFlag(&m_cancelFlag);
 
 		connect(extractCbSpec, &ExtractCallback::progressUpdated,
@@ -112,8 +107,6 @@ void ExtractEngine::run()
 
 		HRESULT hrExtract = archive->Extract(nullptr, static_cast<UInt32>(-1), false, extractCb);
 
-		extractCbSpec->cleanupPendingBuffer();
-		writerThread.stop();
 		archive->Close();
 
 		const qint64 elapsed = timer.elapsed();

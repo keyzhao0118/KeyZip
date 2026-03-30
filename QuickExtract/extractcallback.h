@@ -7,9 +7,6 @@
 #include <QString>
 #include <QAtomicInt>
 
-class FileWriterThread;
-class WriteBufferQueue;
-
 class ExtractCallback
 	: public QObject
 	, public IArchiveExtractCallback
@@ -20,10 +17,8 @@ class ExtractCallback
 	Z7_COM_UNKNOWN_IMP_2(IArchiveExtractCallback, ICryptoGetTextPassword)
 
 public:
-	void init(IInArchive* archive, const QString& destDirPath,
-		const QString& password, FileWriterThread* writerThread);
+	void init(IInArchive* archive, const QString& destDirPath, const QString& password);
 
-	void cleanupPendingBuffer();
 	void setCancelFlag(QAtomicInt* flag) { m_cancelFlag = flag; }
 	UInt64 totalSize() const { return m_totalSize; }
 	int errorCount() const { return m_errorCount; }
@@ -49,16 +44,9 @@ private:
 	QString m_destDirPath;
 	QString m_password;
 
-	FileWriterThread* m_writerThread = nullptr;
-	WriteBufferQueue* m_currentBuffer = nullptr;
-
 	UInt64 m_totalSize = 0;
-	UInt32 m_currentIndex = static_cast<UInt32>(-1);
-	QString m_currentFullPath;
 	QAtomicInt* m_cancelFlag = nullptr;
 	Int32 m_firstFailureReason = 0;
 	int m_errorCount = 0;
 	int m_successCount = 0;
-	bool m_currentIsDir = false;
-	bool m_bSkipCurrent = false;
 };

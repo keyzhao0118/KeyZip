@@ -24,13 +24,8 @@ add_executable(QuickExtract WIN32
 
 	instreamwrapper.h
 	instreamwrapper.cpp
-	asyncoutstreamwrapper.h
-	asyncoutstreamwrapper.cpp
-
-	writebufferqueue.h
-	writebufferqueue.cpp
-	filewriterthread.h
-	filewriterthread.cpp
+	outstreamwrapper.h
+	outstreamwrapper.cpp
 
 	opencallback.h
 	opencallback.cpp
