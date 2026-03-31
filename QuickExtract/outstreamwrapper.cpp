@@ -1,26 +1,32 @@
 #include "outstreamwrapper.h"
+#include "filewritetask.h"
 
-OutStreamWrapper::OutStreamWrapper(const QString& filePath) 
+OutStreamWrapper::OutStreamWrapper(const QString& filePath, QThreadPool* pool)
+	: m_ctx(std::make_shared<FileWriteContext>())
 {
-	m_file.setFileName(filePath);
-	m_file.open(QIODevice::WriteOnly);
+	auto* task = new FileWriteTask(filePath, m_ctx);
+	pool->start(task);
 }
 
 OutStreamWrapper::~OutStreamWrapper()
 {
-	if (m_file.isOpen())
-		m_file.close();
+	QMutexLocker lock(&m_ctx->mutex);
+	m_ctx->noMoreData = true;
+	m_ctx->dataAvailable.wakeOne();
 }
 
 STDMETHODIMP OutStreamWrapper::Write(const void* data, UInt32 size, UInt32* processedSize)
 {
-	if (!m_file.isOpen())
-		return E_FAIL;
+	QMutexLocker lock(&m_ctx->mutex);
 
-	qint64 written = m_file.write(static_cast<const char*>(data), size);
-	
-	if (processedSize) 
-		*processedSize = (written > 0) ? static_cast<UInt32>(written) : 0;
+	while (m_ctx->buffer.size() + static_cast<int>(size) > FileWriteContext::MAX_BUFFER_SIZE)
+		m_ctx->spaceAvailable.wait(&m_ctx->mutex);
 
-	return (written == size) ? S_OK : E_FAIL;
+	m_ctx->buffer.append(static_cast<const char*>(data), size);
+	m_ctx->dataAvailable.wakeOne();
+
+	if (processedSize)
+		*processedSize = size;
+
+	return S_OK;
 }

@@ -2,7 +2,9 @@
 
 #include <Common/MyCom.h>
 #include <7zip/IStream.h>
-#include <QFile>
+#include "filewritecontext.h"
+#include <QThreadPool>
+#include <memory>
 
 class OutStreamWrapper :
 	public ISequentialOutStream,
@@ -11,12 +13,11 @@ class OutStreamWrapper :
 	Z7_COM_UNKNOWN_IMP_1(ISequentialOutStream)
 
 public:
-	OutStreamWrapper(const QString& filePath);
+	OutStreamWrapper(const QString& filePath, QThreadPool* pool);
 	~OutStreamWrapper();
 
-	// ISequentialOutStream
 	STDMETHOD(Write)(const void* data, UInt32 size, UInt32* processedSize) override;
 
 private:
-	QFile m_file;
+	std::shared_ptr<FileWriteContext> m_ctx;
 };

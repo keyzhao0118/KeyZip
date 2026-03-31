@@ -27,6 +27,10 @@ add_executable(QuickExtract WIN32
 	outstreamwrapper.h
 	outstreamwrapper.cpp
 
+	filewritecontext.h
+	filewritetask.h
+	filewritetask.cpp
+
 	opencallback.h
 	opencallback.cpp
 	extractcallback.h
