@@ -165,8 +165,18 @@ void MainWindow::dropEvent(QDropEvent* event)
 			paths.append(url.toLocalFile());
 	}
 
-	if (!paths.isEmpty())
-		startExtraction(paths);
+	if (paths.isEmpty())
+	{
+		event->ignore();
+		return;
+	}
+
+	event->acceptProposedAction();
+
+	QMetaObject::invokeMethod(this, [this, paths]() {
+		if (!m_extracting)
+			startExtraction(paths);
+		}, Qt::QueuedConnection);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
