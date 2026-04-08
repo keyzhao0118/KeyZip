@@ -107,8 +107,6 @@ void ExtractEngine::run()
 
 		HRESULT hrExtract = archive->Extract(nullptr, static_cast<UInt32>(-1), false, extractCb);
 
-		extractCbSpec->waitForIO();
-
 		archive->Close();
 
 		const qint64 elapsed = timer.elapsed();

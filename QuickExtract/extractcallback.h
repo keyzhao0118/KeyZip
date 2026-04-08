@@ -6,7 +6,6 @@
 #include <Common/MyCom.h>
 #include <QString>
 #include <QAtomicInt>
-#include <QThreadPool>
 
 class ExtractCallback
 	: public QObject
@@ -19,7 +18,6 @@ class ExtractCallback
 
 public:
 	void init(IInArchive* archive, const QString& destDirPath, const QString& password);
-	void waitForIO() { m_ioPool.waitForDone(); }
 
 	void setCancelFlag(QAtomicInt* flag) { m_cancelFlag = flag; }
 	UInt64 totalSize() const { return m_totalSize; }
@@ -51,6 +49,4 @@ private:
 	Int32 m_firstFailureReason = 0;
 	int m_errorCount = 0;
 	int m_successCount = 0;
-
-	QThreadPool m_ioPool;
 };

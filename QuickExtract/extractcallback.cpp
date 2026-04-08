@@ -9,7 +9,6 @@ void ExtractCallback::init(IInArchive* archive, const QString& destDirPath, cons
 	m_archive = archive;
 	m_destDirPath = QDir::toNativeSeparators(destDirPath);
 	m_password = password;
-	m_ioPool.setMaxThreadCount(32);
 }
 
 STDMETHODIMP ExtractCallback::SetTotal(const UInt64 size)
@@ -57,7 +56,7 @@ STDMETHODIMP ExtractCallback::GetStream(UInt32 index, ISequentialOutStream** out
 	if (!QDir().exists(parentDir))
 		QDir().mkpath(parentDir);
 
-	OutStreamWrapper* outStreamSpec = new OutStreamWrapper(currentFullPath, &m_ioPool);
+	OutStreamWrapper* outStreamSpec = new OutStreamWrapper(currentFullPath);
 	CMyComPtr<ISequentialOutStream> sequentialOutStream(outStreamSpec);
 
 	*outStream = sequentialOutStream.Detach();
