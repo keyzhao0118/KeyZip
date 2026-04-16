@@ -12,4 +12,8 @@ namespace ArchiveHelper
 		const QString& archivePath,
 		IArchiveOpenCallback* openCallback,
 		CMyComPtr<IInArchive>& outInArchive);
+
+	HRESULT createOutArchive(
+		const QString& format,
+		CMyComPtr<IOutArchive>& outArchive);
 }

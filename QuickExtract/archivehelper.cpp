@@ -73,6 +73,37 @@ CLSID ArchiveHelper::detectArchiveType(const QString& archivePath)
 	return CLSID_NULL;
 }
 
+HRESULT ArchiveHelper::createOutArchive(
+	const QString& format,
+	CMyComPtr<IOutArchive>& outArchive)
+{
+	outArchive.Release();
+
+	QLibrary sevenZipLib("7zip.dll");
+	if (!sevenZipLib.load())
+		return S_FALSE;
+
+	CreateObjectFunc createObjectFunc = (CreateObjectFunc)sevenZipLib.resolve("CreateObject");
+	if (!createObjectFunc)
+		return S_FALSE;
+
+	const GUID* clsid = nullptr;
+	if (format.compare("7z", Qt::CaseInsensitive) == 0)
+		clsid = &CLSID_CFormat7z;
+	else if (format.compare("zip", Qt::CaseInsensitive) == 0)
+		clsid = &CLSID_CFormatZip;
+	else
+		return S_FALSE;
+
+	//extern const GUID IID_IOutArchive;
+	CMyComPtr<IOutArchive> archive;
+	if (createObjectFunc(clsid, &IID_IOutArchive, (void**)&archive) != S_OK)
+		return S_FALSE;
+
+	outArchive = archive;
+	return S_OK;
+}
+
 HRESULT ArchiveHelper::tryOpenArchive(
 	const QString& archivePath,
 	IArchiveOpenCallback* openCallback,

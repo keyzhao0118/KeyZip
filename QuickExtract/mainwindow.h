@@ -8,7 +8,9 @@ class QLabel;
 class QProgressBar;
 class QPushButton;
 class QDialog;
+class QTabWidget;
 class ExtractEngine;
+class CompressEngine;
 
 class MainWindow : public QWidget
 {
@@ -26,31 +28,55 @@ protected:
 	void closeEvent(QCloseEvent* event) override;
 
 private:
-	void selectFiles();
+	bool isBusy() const;
+	int currentTab() const;
+
+	// Extract
+	void selectExtractFiles();
 	void startExtraction(const QStringList& archivePaths);
 	void cancelExtraction();
 	void stopExtraction();
-	void exitApplication();
 	void setExtracting(bool extracting);
 	void onPasswordRequired(QString& password);
 	void showExtractionSummary();
+
+	// Compress
+	void selectCompressFiles();
+	void startCompression(const QStringList& paths);
+	void cancelCompression();
+	void stopCompression();
+	void setCompressing(bool compressing);
+	void showCompressionSummary(bool success, const QString& errorMsg, qint64 elapsedMs);
+
+	void exitApplication();
 	void setupTrayIcon();
-	void setDropHighlight(bool highlight);
+	void setDropHighlight(QLabel* label, bool highlight);
 
 	static QString formatElapsed(qint64 ms);
 
-	QLabel* m_dropLabel = nullptr;
+	QTabWidget* m_tabWidget = nullptr;
 
-	QWidget* m_progressSection = nullptr;
-	QLabel* m_archiveLabel = nullptr;
-	QProgressBar* m_progressBar = nullptr;
-	QPushButton* m_cancelButton = nullptr;
+	// Extract tab widgets
+	QLabel* m_extractDropLabel = nullptr;
+	QWidget* m_extractProgressSection = nullptr;
+	QLabel* m_extractArchiveLabel = nullptr;
+	QProgressBar* m_extractProgressBar = nullptr;
+	QPushButton* m_extractCancelButton = nullptr;
+
+	// Compress tab widgets
+	QLabel* m_compressDropLabel = nullptr;
+	QWidget* m_compressProgressSection = nullptr;
+	QLabel* m_compressStatusLabel = nullptr;
+	QProgressBar* m_compressProgressBar = nullptr;
+	QPushButton* m_compressCancelButton = nullptr;
 
 	QSystemTrayIcon* m_trayIcon = nullptr;
 
-	ExtractEngine* m_engine = nullptr;
+	ExtractEngine* m_extractEngine = nullptr;
+	CompressEngine* m_compressEngine = nullptr;
 	QDialog* m_passwordDialog = nullptr;
 	bool m_extracting = false;
+	bool m_compressing = false;
 	bool m_quitting = false;
 	QStringList m_extractionLog;
 };

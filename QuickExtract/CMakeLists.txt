@@ -22,15 +22,25 @@ add_executable(QuickExtract WIN32
 	extractengine.h
 	extractengine.cpp
 
+	compressengine.h
+	compressengine.cpp
+
 	instreamwrapper.h
 	instreamwrapper.cpp
 	outstreamwrapper.h
 	outstreamwrapper.cpp
+	compressoutstream.h
+	compressoutstream.cpp
 
 	opencallback.h
 	opencallback.cpp
 	extractcallback.h
 	extractcallback.cpp
+	updatecallback.h
+	updatecallback.cpp
+
+	compressoptionsdialog.h
+	compressoptionsdialog.cpp
 )
 
 target_link_libraries(QuickExtract
